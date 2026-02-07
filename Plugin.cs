@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using HarmonyLib;
 using Photon.Pun;
 using System;
@@ -6,6 +6,7 @@ using System.Collections;
 using System.Xml;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using static UnneededInfo.ColorLib;
 
@@ -14,6 +15,9 @@ namespace UnneededInfo
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
+        private string latestVersion = "";
+        private bool updateAvailable = false;
+        private bool versionChecked = false;
         void Awake()
         {
             var harmony = new Harmony(PluginInfo.Name);
@@ -21,7 +25,10 @@ namespace UnneededInfo
             Logger.LogInfo($"{PluginInfo.Name} v{PluginInfo.Version} loaded.");
 
             SceneManager.sceneLoaded += OnSceneLoaded;
+
+            StartCoroutine(CheckForUpdates());
         }
+
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             StartCoroutine(ChangeCOC());
@@ -93,13 +100,50 @@ namespace UnneededInfo
 
             if (tmpText == null) return;
 
+            string updateLine = "";
+
+            if (versionChecked)
+            {
+                updateLine = updateAvailable
+                    ? $"Update Available: v{latestVersion}"
+                    : "Mod is up to date";
+            }
+            else
+            {
+                updateLine = "Checking for updates...";
+            }
+
             tmpText.text =
                 $"FPS: {Mathf.Ceil(1f / Time.unscaledDeltaTime)}\n" +
                 $"Ping: {PhotonNetwork.GetPing()}\n" +
+                $"IsMaster: {PhotonNetwork.IsMasterClient}\n" +
                 $"Time: {DateTime.Now:HH:mm:ss}\n" +
-                $"Unneeded Info v{PluginInfo.Version}";
+                updateLine;
 
             tmpText.ForceMeshUpdate(true);
+        }
+        private IEnumerator CheckForUpdates()
+        {
+            using (UnityWebRequest www = UnityWebRequest.Get(PluginInfo.VersionUrl))
+            {
+                yield return www.SendWebRequest();
+
+                if (www.result != UnityWebRequest.Result.Success)
+                {
+                    Logger.LogWarning("Version check failed: " + www.error);
+                    yield break;
+                }
+
+                latestVersion = www.downloadHandler.text
+                    .Replace("\uFEFF", "") // BOM
+                    .Trim();
+
+                Logger.LogInfo($"Installed version: '{PluginInfo.Version}'");
+                Logger.LogInfo($"Latest version from GitHub: '{latestVersion}'");
+
+                updateAvailable = latestVersion != PluginInfo.Version;
+                versionChecked = true;
+            }
         }
     }
 }
