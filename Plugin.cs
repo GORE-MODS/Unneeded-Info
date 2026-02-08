@@ -118,6 +118,7 @@ namespace UnneededInfo
                 $"IsMaster: {PhotonNetwork.IsMasterClient}\n" +
                 $"Time: {DateTime.Now:HH:mm:ss}\n" +
                 $"Server Region: {PhotonNetwork.CloudRegion}\n" +
+                $"Your Player ID: {PhotonNetwork.LocalPlayer.UserId}\n" +
                 updateLine;
 
             tmpText.ForceMeshUpdate(true);
@@ -135,7 +136,7 @@ namespace UnneededInfo
                 }
 
                 latestVersion = www.downloadHandler.text
-                    .Replace("\uFEFF", "") // BOM
+                    .Replace("\uFEFF", "") // BOM BING POW
                     .Trim();
 
                 Logger.LogInfo($"Installed version: '{PluginInfo.Version}'");
