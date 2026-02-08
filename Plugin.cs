@@ -86,11 +86,10 @@ namespace UnneededInfo
             }
 
             tmpText.text = "Loading Unneeded Info Created by GORE";
-            tmpText.fontSize = 80f;
+            tmpText.fontSize = 74f;
             tmpText.alignment = TextAlignmentOptions.Center;
             tmpText.enableVertexGradient = true;
             tmpText2.text = $"Unneeded Info V{PluginInfo.Version}";
-            tmpText2.enableVertexGradient = true;
             tmpText2.color = Color.red;
         }
         void Update()
@@ -118,6 +117,7 @@ namespace UnneededInfo
                 $"Ping: {PhotonNetwork.GetPing()}\n" +
                 $"IsMaster: {PhotonNetwork.IsMasterClient}\n" +
                 $"Time: {DateTime.Now:HH:mm:ss}\n" +
+                $"Server Region: {PhotonNetwork.CloudRegion}\n" +
                 updateLine;
 
             tmpText.ForceMeshUpdate(true);
